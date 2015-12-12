@@ -28,6 +28,11 @@ class vectorTilesToRedis{
         return $redis;
     }
 
+    public function setRedisSaveMod($mod){
+        if($mod == self::EXEC_MOD_APPEND || $mod == self::EXEC_MOD_FLUSH)
+            $this->exec_mod = $mod;
+    }
+
     public function setTilesPath($path){
         $this->path = $path;
     }
