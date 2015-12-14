@@ -15,20 +15,22 @@ class vectorTilesToRedis{
 
     private $exec_mod;
 
+    private $database;
+
     public function __construct()
     {
         $this->exec_mod = self::EXEC_MOD_FLUSH;
     }
 
+    public function setDatabase(databaseInterface $database){
 
-    private function initRedisConnection(){
-        $redis = new Redis();
-        $redis->connect('127.0.0.1', 6379);
-
-        return $redis;
+        if($database instanceof databaseInterface)
+            $this->database = $database;
+        else
+            throw \Exception('database must is a instance of databaseInterface');
     }
 
-    public function setRedisSaveMod($mod){
+    public function setSaveMod($mod){
         if($mod == self::EXEC_MOD_APPEND || $mod == self::EXEC_MOD_FLUSH)
             $this->exec_mod = $mod;
     }
@@ -43,13 +45,14 @@ class vectorTilesToRedis{
 
     public function import(){
 
-        $redis = $this->initRedisConnection();
+        if(!$this->database instanceof databaseInterface)
+            throw \Exception('database not set');
 
         if($this->exec_mod == self::EXEC_MOD_FLUSH)
-            $redis->flushAll();
+            $this->database->flushData();
 
         foreach($this->tiles as $key=>$file){
-            $redis->set($key,file_get_contents($file));
+            $this->database->saveTile($key,file_get_contents($file));
             echo "insert: " .$key ."\r\n";
         }
 
