@@ -5,7 +5,11 @@
  * Date: 12/12/15
  * Time: 10:44 PM
  */
-class vectorTilesToRedis{
+namespace VectorTile;
+
+use VectorTile\Db\DbInterface;
+
+class ToRedis{
 
     private $path = "";
     private $tiles = [];
@@ -15,6 +19,7 @@ class vectorTilesToRedis{
 
     private $exec_mod;
 
+    /** @var  DbInterface */
     private $database;
 
     public function __construct()
@@ -22,9 +27,9 @@ class vectorTilesToRedis{
         $this->exec_mod = self::EXEC_MOD_FLUSH;
     }
 
-    public function setDatabase(databaseInterface $database){
+    public function setDatabase(DbInterface $database){
 
-        if($database instanceof databaseInterface)
+        if($database instanceof DbInterface)
             $this->database = $database;
         else
             throw \Exception('database must is a instance of databaseInterface');
@@ -45,11 +50,14 @@ class vectorTilesToRedis{
 
     public function import(){
 
-        if(!$this->database instanceof databaseInterface)
-            throw \Exception('database not set');
-
-        if($this->exec_mod == self::EXEC_MOD_FLUSH)
-            $this->database->flushData();
+        if($this->exec_mod == self::EXEC_MOD_FLUSH){
+            try{
+                $this->database->flushData();
+            }catch(\Exception $e){
+                echo $e->getMessage();
+                echo "\r\n";
+            }
+        }
 
         foreach($this->tiles as $key=>$file){
             $this->database->saveTile($key,file_get_contents($file));

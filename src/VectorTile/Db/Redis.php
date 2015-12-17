@@ -5,23 +5,40 @@
  * Date: 12/14/15
  * Time: 3:02 PM
  */
-class redisDatabase implements databaseInterface{
+namespace VectorTile\Db;
 
-    /** @var  Redis */
+class Redis implements DbInterface{
+
+    /** @var  \Redis */
     private $redis;
+
+    private $param;
+
+    public function __construct($param = ""){
+        $this->param = $param;
+    }
 
     /**
      * @param $param
+     * @return null
      */
     public function setConnection($param)
     {
-        $redis = new Redis();
-        $this->redis = $redis->connect($param['host'],$param['port']);
+        if(empty($param))
+            $param = $this->param;
+
+        if(empty($param))
+            exit("cannot connect to a empty database");
+
+        $redis = new \Redis();
+        $redis->connect($param['host'],$param['port']);
+        $this->redis = $redis;
     }
 
     /**
      * @param $tile_key
      * @param $tile
+     * @return null
      */
     public function saveTile($tile_key,$tile)
     {
